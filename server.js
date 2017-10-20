@@ -26,21 +26,21 @@ const toNameAddress = ({email, name}) => ({name, address: email});
 const getReceiverList = ({ to = [] }) => to.map(toNameAddress);
 const getReceivers = ({ body: { personalizations = [] } }) => personalizations.map(getReceiverList).reduce(flatten);
 const getFrom = ({body: { from }}) => toNameAddress(from);
-const getSubject = ({body: { subject }}) => subject;
+const getSubjectFromPersonalizations = (personalizations) => (personalizations.find((p) => p.subject) || {}).subject;
+const getSubject = ({body: { personalizations = [], subject }}) => subject || getSubjectFromPersonalizations(personalizations);
 const getValue = ({ value } = {}) => value || '';
 const getPlainText = ({body: { content = [] }}) => getValue(content.find((c) => c.type === 'text/plain') || {});
 const getHtml = ({body: { content = [] } }) => getValue(content.find((c) => c.type === 'text/html') || {});
 
 app.post('/v3/mail/send', (req, res) => {
     const mailOptions = {
-        from: getFrom(req), // sender address
+        from: getFrom(req),
         to: getReceivers(req),
         subject: getSubject(req),
         text: getPlainText(req),
         html: getHtml(req),
     };
 
-    // send mail with defined transport object
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             return res.sendStatus(500).send(error.message);
