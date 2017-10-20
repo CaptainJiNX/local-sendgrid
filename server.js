@@ -50,3 +50,5 @@ app.post('/v3/mail/send', (req, res) => {
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
+
+process.once('SIGTERM', process.exit);
