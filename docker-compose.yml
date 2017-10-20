@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+  local-sendgrid:
+    build: .
+    environment:
+      - SMTP_HOST=smtp-server
+    ports:
+      - "1337:80"
+    depends_on:
+      - smtp-server
+
+  smtp-server:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
